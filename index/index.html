@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Keputusan Akademik</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+        }
+
+        /* Layout Utama: Split Screen */
+        .layout-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Bahagian Kiri: Gambar Estetik */
+        .image-section {
+            flex: 1.2;
+            background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4));
+        }
+
+        .branding {
+            position: relative;
+            z-index: 10;
+            color: white;
+            max-width: 500px;
+        }
+
+        .branding h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .branding p {
+            font-size: 1.1rem;
+            font-weight: 300;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Bahagian Kanan: Portal Semakan */
+        .portal-section {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+        }
+
+        .portal-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .portal-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .portal-header h2 {
+            color: var(--text-dark);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .portal-header p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Search Input Design */
+        .search-box {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 16px 20px;
+            padding-right: 120px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-box button {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            bottom: 8px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 20px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-box button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Result Card Design */
+        .result-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            display: none; /* Hidden by default */
+            animation: slideUp 0.5s ease;
+        }
+
+        .result-card.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .student-info {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .student-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .student-id {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Subjects Container */
+        .subjects-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .subjects-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .subject-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 140px;
+        }
+
+        .subject-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 36px;
+        }
+
+        .progress-ring {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(#e2e8f0 100%, transparent 0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: background 1s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .progress-ring::before {
+            content: "";
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .score-text {
+            position: relative;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1;
+        }
+
+        .score-max {
+            position: relative;
+            font-size: 0.7rem;
+            color: var(--text-light);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Advice Box */
+        .advice-box {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 0 12px 12px 0;
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .advice-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .advice-text {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        /* Responsive untuk paparan Telefon */
+        @media (max-width: 900px) {
+            .layout-wrapper {
+                flex-direction: column;
+            }
+            .image-section {
+                flex: none;
+                height: 30vh;
+                padding: 2rem;
+                background-position: top;
+            }
+            .branding h1 { font-size: 2rem; }
+            .branding p { font-size: 0.9rem; display: none; }
+            .portal-section {
+                flex: 1;
+                border-radius: 30px 30px 0 0;
+                margin-top: -30px;
+                z-index: 20;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="layout-wrapper">
+        <!-- Bahagian Kiri: Gambar Unsplash (Boleh ditukar) -->
+        <div class="image-section">
+            <div class="image-overlay"></div>
+            <div class="branding">
+                <h1>Portal Pintar Akademik</h1>
+                <p>Akses keputusan dan prestasi anda secara peribadi. Masukkan nombor ID pelajar anda untuk melihat markah terkini secara pantas dan selamat.</p>
+            </div>
+        </div>
+
+        <!-- Bahagian Kanan: Carian dan Keputusan -->
+        <div class="portal-section">
+            <div class="portal-container">
+                <div class="portal-header">
+                    <h2>Semakan Markah</h2>
+                    <p>Sila masukkan ID Pelajar anda di bawah</p>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" id="studentId" placeholder="Contoh: Ali01, Abu02..." autocomplete="off">
+                    <button id="searchBtn" onclick="fetchData()">Semak</button>
+                </div>
+                
+                <div class="error-msg" id="errorMsg">Rekod tidak dijumpai. Sila cuba lagi.</div>
+
+                <!-- Kad Keputusan (Muncul selepas carian berjaya) -->
+                <div class="result-card" id="resultCard">
+                    <div class="student-info">
+                        <div class="student-name" id="studentName">Nama Pelajar</div>
+                        <div class="student-id" id="displayId">ID: -</div>
+                    </div>
+                    
+                    <div class="subjects-container">
+                        <!-- Kotak Subjek Dinamik (Hanya 1 akan dipaparkan) -->
+                        <div class="subject-box">
+                            <div class="subject-title" id="subjectTitle">Nama Subjek</div>
+                            <div class="progress-ring" id="progressRing">
+                                <div style="display:flex; flex-direction:column; align-items:center;">
+                                    <div class="score-text" id="scoreValue">0</div>
+                                    <div class="score-max" id="scoreMax">/ 100</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nasihat / Komen -->
+                    <div class="advice-box">
+                        <div class="advice-title">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Ulasan Akademik
+                        </div>
+                        <div class="advice-text" id="adviceText">
+                            Sistem sedang menganalisis prestasi anda...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL Google Apps Script yang baru anda berikan
+        const API_URL = "https://script.google.com/macros/s/AKfycbxTOgytVJXcMb0tebw-V-wcs77I3XpsobNgyHbXoDZbrPvxyenFREsDqgoBlI2Bn1ekMg/exec";
+
+        async function fetchData() {
+            const idInput = document.getElementById('studentId').value.trim();
+            if(!idInput) return;
+
+            const btn = document.getElementById('searchBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const card = document.getElementById('resultCard');
+            
+            // Set butang ke mod 'loading'
+            btn.textContent = "Sila tunggu...";
+            btn.style.opacity = '0.7';
+            errorMsg.style.opacity = '0';
+            card.classList.remove('active');
+
+            try {
+                // Fetch data dari Google Sheets API (Apps Script)
+                const response = await fetch(`${API_URL}?id=${encodeURIComponent(idInput)}`);
+                const data = await response.json();
+
+                if(data.status === 'success') {
+                    let subjectTitle = "";
+                    let markah = 0;
+                    let maxMark = 100;
+
+                    // Semak subjek mana yang diambil oleh pelajar
+                    // Syarat: Dalam Google Sheet, tinggalkan kosong (blank) pada subjek yang pelajar tak ambil
+                    if (data.markahArab !== undefined && data.markahArab !== "") {
+                        subjectTitle = "B. Arab Muamalat";
+                        markah = data.markahArab;
+                        maxMark = 60;
+                    } else if (data.markahIslam !== undefined && data.markahIslam !== "") {
+                        subjectTitle = "Pend. Islam 1";
+                        markah = data.markahIslam;
+                        maxMark = 80;
+                    } else if (data.markah !== undefined) {
+                        // Fallback jika API Apps Script lama masih digunakan
+                        subjectTitle = "Markah Keseluruhan";
+                        markah = data.markah;
+                        maxMark = 100; // Default
+                    }
+                    
+                    updateUI(data.nama, idInput, subjectTitle, markah, maxMark);
+                } else {
+                    errorMsg.style.opacity = '1';
+                }
+            } catch(e) {
+                errorMsg.textContent = 'Ralat sistem. Pastikan URL API adalah betul.';
+                errorMsg.style.opacity = '1';
+            } finally {
+                btn.textContent = "Semak";
+                btn.style.opacity = '1';
+            }
+        }
+
+        function updateUI(nama, id, subjectTitle, markah, maxMark) {
+            document.getElementById('studentName').textContent = nama;
+            document.getElementById('displayId').textContent = `ID: ${id}`;
+            
+            // Update maklumat subjek dinamik
+            document.getElementById('subjectTitle').textContent = subjectTitle;
+            document.getElementById('scoreValue').textContent = markah;
+            document.getElementById('scoreMax').textContent = `/ ${maxMark}`;
+
+            // Pengiraan Peratusan (%)
+            const pct = Math.min((markah / maxMark) * 100, 100);
+
+            // Logik warna & cincin
+            let color = pct >= 80 ? '#10b981' : (pct >= 50 ? '#f59e0b' : '#ef4444');
+            document.getElementById('progressRing').style.background = `conic-gradient(${color} 0%, ${color} ${pct}%, #f1f5f9 ${pct}%, #f1f5f9 100%)`;
+
+            // Logik Nasihat (Berdasarkan peratusan)
+            let nasihat = "";
+            let nasihatColor = "var(--primary)";
+            if (pct >= 80) {
+                nasihat = "Tahniah! Pencapaian anda sangat cemerlang. Teruskan usaha mengekalkan kecemerlangan ini.";
+                nasihatColor = "#10b981"; // Hijau
+            } else if (pct >= 50) {
+                nasihat = "Prestasi yang memuaskan. Anda mempunyai potensi besar untuk mendapat markah yang lebih tinggi jika gandakan usaha.";
+                nasihatColor = "#f59e0b"; // Oren
+            } else {
+                nasihat = "Perhatian: Markah anda di bawah tahap memuaskan. Sila berjumpa dengan pensyarah untuk bimbingan tambahan.";
+                nasihatColor = "#ef4444"; // Merah
+            }
+
+            document.querySelector('.advice-title').style.color = nasihatColor;
+            document.querySelector('.advice-box').style.borderLeftColor = nasihatColor;
+            document.getElementById('adviceText').textContent = nasihat;
+
+            // Paparkan kad keputusan
+            document.getElementById('resultCard').classList.add('active');
+        }
+
+        // Fungsi carian menggunakan butang 'Enter' pada keyboard
+        document.getElementById('studentId').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') fetchData();
+        });
+    </script>
+</body>
+</html>
